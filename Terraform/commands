@@ -1,0 +1,2 @@
+terraform plan -var-file="prod.tfvars"
+terraform plan -var="instance_type=m5.large"
