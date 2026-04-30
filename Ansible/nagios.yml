@@ -1,0 +1,100 @@
+---
+# tasks file for linux-nagios
+- name: Enable EPEL Repository on RedHat Servers
+  yum:
+    name:
+https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+    state: latest
+  when: ansible_distribution == "RedHat"
+- name: Install nagios packages on RedHat
+  yum:
+    name: "{{ item }}"
+    state: latest
+  with_items:
+    - nrpe
+    - nagios-plugins-all
+  when: ansible_distribution == "RedHat"
+- name: Install nagios packages on Oracle
+  yum:
+    name: "{{ item }}"
+    enablerepo: ol7_developer_EPEL
+    state: present
+  with_items:
+    - nrpe
+    - nagios-plugins-all
+  when: ansible_distribution == "OracleLinux"
+- name: Install nagios packages on Debian
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - nagios-nrpe-server
+    - nagios-plugins-basic
+  when: ansible_distribution == "Debian"
+- name: Create the directory /etc/nagios/nrpe.d
+  file:
+    path: /etc/nagios/nrpe.d
+    mode: 0755
+    owner: nagios
+    group: nagios
+    state: directory
+    force: yes
+  when: ansible_distribution == "RedHat" or ansible_distribution == "OracleLinux"
+- name: Copy the Nagios configuration file for RedHat Linux
+  template:
+    src: nrpe.cfg.j2
+    dest: /etc/nagios/nrpe.cfg
+    mode: 0644
+    owner: nrpe
+    group: nrpe
+  when: ansible_distribution == "RedHat"
+- name: Copy the Nagios configuration file for OracleLinux
+  template:
+    src: nrpe-oracle.cfg.j2
+    dest: /etc/nagios/nrpe.cfg
+    mode: 0644
+    owner: nrpe
+    group: nrpe
+  when: ansible_distribution == "OracleLinux"
+- name: Copy the Nagios configuration file for Debian
+  template:
+    src: nrpe-debian.cfg.j2
+    dest: /etc/nagios/nrpe.cfg
+    mode: 0644
+    owner: root
+    group: root
+  when: ansible_distribution == "Debian"
+- name: Copy the Nagios command configuration file
+  template:
+    src: command-plugins.cfg.j2
+    dest: /etc/nagios/nrpe.d/command-plugins.cfg
+    mode: 0644
+    owner: nrpe
+    group: nrpe
+  when: ansible_distribution == "RedHat" or ansible_distribution == "OracleLinux"
+- name: Copy the Nagios command configuration file for Debian
+  template:
+    src: command-plugins-debian.cfg.j2
+    dest: /etc/nagios/nrpe.d/command-plugins.cfg
+    mode: 0644
+    owner: root
+    group: root
+  when: ansible_distribution == "Debian"
+- name: Create the directory for the nrpe.pid
+  file:
+    path: /var/run/nagios
+    mode: 0770
+    owner: nagios
+    group: nagios
+    state: directory
+  when: ansible_distribution == "RedHat"
+- name: Restart nrpe
+  service:
+    name: nrpe
+    state: restarted
+  when: ansible_distribution == "RedHat" or ansible_distribution == "OracleLinux"
+- name: Restart nrpe on Debian
+  service:
+    name: nagios-nrpe-server.service
+    state: restarted
+  when: ansible_distribution == "Debian"
