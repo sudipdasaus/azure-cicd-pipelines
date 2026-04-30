@@ -1,0 +1,41 @@
+---
+- name: Configure and restart rsyslog
+  hosts: aeaunxapp01 
+  become: true
+  become_user: root
+  tasks:
+    - name: Creating 50_linuxauth.conf file
+      file:
+        path: "/etc/rsyslog.d/50_linuxauth.conf"
+        state: touch
+
+    - name: Create 50_linuxauth.conf file
+      blockinfile:
+        path: /etc/rsyslog.d/50_linuxauth.conf
+        block: |
+          # Content for 50_linuxauth.conf
+          auth.*;authpriv.* action(
+              type="omfwd"
+              target="aeapinfsec01.ce.corp"
+              port="514"
+              protocol="tcp"
+              action.resumeRetryCount="100"
+              queue.type="linkedList"
+              queue.size="10000"
+          )
+
+    - name: Validate rsyslog configuration
+      command:
+        cmd: rsyslogd -N 5 -f /etc/rsyslog.conf
+      ignore_errors: true
+      register: validation_result
+
+    - name: Print validation result
+      debug:
+        var: validation_result.stderr_lines
+
+    - name: Restart rsyslog service if validation is successful
+      systemd:
+        name: rsyslog
+        state: restarted
+      when: "'End of config validation run. Bye' in validation_result.stderr_lines[1]"
