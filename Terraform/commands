@@ -1,2 +1,69 @@
 terraform plan -var-file="prod.tfvars"
 terraform plan -var="instance_type=m5.large"
+
+export TF_LOG_PATH=/home/sudip/sudip/Terraform/Winc-Platform/Practice/terraform-crash.log
+export TF_LOG=TRACE
+terraform fmt
+terraform validate
+terraform refresh
+terraform init -upgrade
+terraform apply -replace="aws_instance.web"
+terraform graph > graph.dot
+graphviz
+terraform plan main.tf
+terraform plan -out=/tmp/plan
+terraform apply /tmp/plan
+terraform destroy => allows us to destroy all the resource that are created within the folder.
+terraform destroy - target aws_instance.myec2 => allows us to destroy the specific resource.
+terraform output <output_variable>
+terraform show
+terraform state list
+terraform state show <resource>
+terraform state rm <resource>
+terraform state mv <resource> <resource>
+terraform import <resource> <resource_id>
+terraform plan refresh=false
+terraform plan main.tf
+terraform plan -var-file=prod.tfvars
+terraform plan virtual_machine.tf
+terraform import 
+terraform taint aws_instance.web
+terraform untaint aws_instance.web
+terraform apply -replace="aws_instance.web"
+terraform apply -target=aws_instance.web
+terraform import aws_instance.web i-123456
+terraform plan -generate-config-out=generated.tf
+https://developer.hashicorp.com/terraform/tutorials/state/state-import
+terraform woeksapce show
+terraform workspace new dev
+terraform workspace select dev
+
+##terraform debug##
+export TF_LOG=TRACE
+export TF_LOG_PATH=/home/sudip/sudip/Terraform/Winc-Platform/Practice/terraform-crash.log
+
+##Implement and maintain state##
+terraform show ===> show the state file.
+terraform state -help.
+terraform state show aws_instance.web ===> show the state of the resource and it's attributes. 
+terraform state pull ===> pull the state file from the remote backend.
+terraform state rm aws_instance.web ===> remove the resource from the state file.
+terraform state list ===> list of resources.
+terraform.tfstate => terraform state file.
+terraform appl -lock-timeout=20s.
+terraform apply -lock=true: Enables state locking for the apply operation (default behavior).
+terraform plan -lock=true: Enables state locking for the plan operation (default behavior).
+terraform state unlock: Manually unlocks the state if it gets stuck.
+terraform state mv aws_instance.web aws_instance.web2 ===> move the resource from one to another.
+terraform state replace-provider registry.terraform.io/hashicorp/aws registry.terraform.io/hashicorp/aws.
+
+
+##Remote state management##
+data remote_state "vpc" {
+  backend = "s3"
+  config = {
+    bucket = "mybucket"
+    key    = "path/to/my/key"
+    region = "us-east-1"
+  }
+}
