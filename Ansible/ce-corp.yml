@@ -1,0 +1,15 @@
+---
+- hosts: aeapwmappmws40
+  become: yes
+  tasks:
+    -name: update ce.corp file
+     lineinfile:  
+        path: /etc/resolv.conf
+        line: "search reddog.microsoft.com"
+        state: absent
+    -name: update ce.corp file
+     lineinfile:
+        path: /etc/resolv.conf
+        line: "search ce.corp"
+        state: present
+
