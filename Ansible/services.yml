@@ -1,0 +1,15 @@
+---
+- hosts: tst2
+  become: true
+  gather_facts: false
+  tasks:
+    - name: Httpd installation
+      yum:   
+        name: httpd
+        state: present
+    - name: Starting and Enabling Httpd service
+      service:
+        name: httpd
+        state: started
+        enabled: yes
+...
