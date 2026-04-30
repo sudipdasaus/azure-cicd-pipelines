@@ -1,0 +1,11 @@
+---
+- name: Copy script and file to remote host
+  hosts: aeadwmappb2b39
+  become: yes
+  tasks:
+    - name: Copy FS-Linux-Agent.py script
+      ansible.builtin.copy:
+        src: /home/ansible/sudip/FS-Linux-Agent.py
+        dest: /home/ansible/FS-Linux-Agent.py
+        mode: '0755'
+...
