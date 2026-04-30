@@ -1,2 +1,113 @@
 #All usefull commands for Ansible#
- 
+
+
+
+#This is used for Ansible Commands#
+ansible 10.211.1.10 -m ping -u sudip
+
+ansible-playbook user.yml -u sudip -i 10.211.1.10, -K   ==> To run previledge command. 
+
+[privilege_escalation]
+#become=True
+#become_method=sudo
+#become_user=root
+#become_ask_pass=False
+
+Here's what each line means:
+
+become=True: This would tell Ansible to use privilege escalation (if it wasn't commented out). In other words, it would perform operations with superuser privileges.
+
+become_method=sudo: This would set the method for privilege escalation to sudo (if it wasn't commented out). This is the default method on most systems.
+
+become_user=root: This would tell Ansible to become the root user when escalating privileges (if it wasn't commented out).
+
+become_ask_pass=False: This would tell Ansible not to prompt for a password when escalating privileges (if it wasn't commented out). This is useful if you're using SSH keys for authentication, or if the user Ansible is running as has passwordless sudo enabled.
+
+
+handler: ==> It is used to restart the service after the changes are made.
+  - name: restart apache
+    service:
+      name: apache2
+      state: restarted
+  - name: restart mysql
+    service:
+      name: mysql
+      state: restarted
+
+notify:
+  - restart apache
+  - restart mysql
+
+meta:flush_handlers
+--force-handler ==> in case of failure, it will force the handler to run.
+
+Environment Variables: 
+  - name: Set environment variables
+    environment:
+      http_proxy: http://proxy.example.com:8080
+      https_proxy: http://proxy.example.com:8080
+      no_proxy: localhost,
+
+
+register: ==> It is used to store the output of the command in a variable.
+  - name: Run a command and register the output
+    command: /usr/bin/uptime
+    register: result
+
+debug: ==> It is used to print the output of the command.
+  - name: Debug output
+    debug:
+      var: result
+
+
+vars:  ==> It is used to set the variables.
+  - name: Set variables
+    vars:
+      myvar1: value1
+      myvar2: value2
+
+when:  ==> It is used to execute the command based on the condition.
+  - name: Conditional execution
+    command: /usr/bin/uptime
+    register: result
+    when: result.stdout.find('load') == -1
+
+include_vars:  ==> It is used to include the variables from the file.
+  - name: Include variables from a file
+    include_vars: "{{ item }}"
+    with_first_found:
+      - files:
+          - /etc/myvars.yml
+          - /etc/myvars.yaml
+          - /etc/myvars.json
+      - missing_ok: yes
+
+setup:  ==> It is used to gather the facts of the system.
+  - name: Gather facts
+    setup:      `
+
+---
+- hosts: aeadwmappb2b39
+  gather_facts: yes
+  tasks:
+    - name: printing the hostname
+      debug:
+        var: ansible_facts
+
+
+---
+- hosts: aeadwmappb2b39
+  gather_facts: false  # Disable automatic fact gathering
+  tasks:
+    - name: Gather facts
+      setup:
+
+    - name: printing the hostname
+      debug:
+        msg: 'The hostname is {{ ansible_facts["hostname"] }}'
+
+
+## Data filetering / manupulating ##
+- ansible.builtin.debug:
+     msg: test
+  when: some_string_value | bool
