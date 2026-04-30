@@ -1,0 +1,46 @@
+---
+- name: Deploy VM in Azure using existing resources
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    resource_group: "rg-aea-dev-tier2"
+    vm_name: "aeatstautom04"
+    vm_size: "Standard_DS1_v2"
+    admin_username: "ansible"
+    admin_password: "Used2Bl0gical"
+    virtual_network_name: "vnet-aze-dev"
+    subnet_name: "sub-aea-dev-pronto"
+    nsg_name: "your_existing_nsg_name"
+
+  tasks:
+    - name: Create virtual machine
+      ansible.builtin.include_role:
+      name: "azure.azcollection.azure_rm_virtualmachine"
+	tasks_from: "main"
+      vars:
+        resource_group: "{{ resource_group }}"
+        name: "{{ vm_name }}"
+        vm_size: "{{ vm_size }}"
+        admin_username: "{{ admin_username }}"
+        admin_password: "{{ admin_password }}"
+        image:
+          offer: "CentOS"
+          publisher: "OpenLogic"
+          sku: "7.9"
+          version: "latest"
+        network_interfaces: "{{ vm_name }}"
+        os_disk:
+          name: "{{ vm_name }}-disk"
+          create_option: fromImage
+          disk_size_gb: 30
+        virtual_network_name: "{{ virtual_network_name }}"
+        subnet_name: "{{ subnet_name }}"
+        network_security_group: "{{ nsg_name }}"
+        state: present
+      register: vm_result
+
+    - name: Print VM information
+      debug:
+        var: vm_result
