@@ -1,0 +1,17 @@
+---
+- hosts: aeauwmappmws40
+  become: yes
+  tasks:
+    - name: create new file
+      file:
+        name: /etc/NetworkManager/conf.d/dns-search.conf
+        state: touch
+    - name: Add entries to /etc/NetworkManager/conf.d/dns-search.conf file
+      blockinfile:
+        path: /etc/NetworkManager/conf.d/dns-search.conf
+        block: |
+          [main]
+          dns=default
+
+          [global-dns-domain-*]
+          search=ce.corp
