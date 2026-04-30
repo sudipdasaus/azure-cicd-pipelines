@@ -1,0 +1,10 @@
+---
+- hosts: wmdev
+  tasks:
+    - name: Get top 5 memory consuming processes and their users
+      shell: ps -eo pid,user,%mem,command --sort=-%mem | head -n 6
+      register: result
+
+    - name: Display result
+      debug:
+        var: result.stdout_lines
