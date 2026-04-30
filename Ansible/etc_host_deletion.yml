@@ -1,0 +1,18 @@
+---
+- name: Delete entries to /etc/hosts file
+  hosts: wmprodnew
+  become: yes
+  tasks:
+    - name: Delete entries to /etc/hosts file
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item }}"
+        state: absent
+      with_items:
+        - "10.210.45.7     prdtnis1.ce.corp        prdtnis1"
+        - "10.210.45.8     prdtnis2.ce.corp        prdtnis2"
+        - "10.210.45.10     prdeaiis1.ce.corp       prdeaiis1"
+        - "10.210.45.9     prdeaiis2.ce.corp       prdeaiis2"
+        - "10.210.45.11     prdmws1.ce.corp         prdmws1"
+        - "10.210.45.12     prdmws2.ce.corp         prdmws2"
+        - "10.210.45.13     prdbkr1.ce.corp         prdbkr1"
