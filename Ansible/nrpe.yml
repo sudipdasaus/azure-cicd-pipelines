@@ -1,0 +1,123 @@
+---
+- hosts: wmprodnew
+  become: yes
+  tasks:
+    - name: Install epel-release
+      command: dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+      #command: yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm
+    
+    - name: Install nagios-common
+      dnf:
+        name: nagios-common
+        state: present
+
+    - name: Ensure nrpe user exists
+      user:
+        name: nrpe
+        state: present
+
+    - name: Copy nrpe rpm
+      copy:
+        src: /home/sudip/Nagios/nrpe-4.1.0-2.el9.x86_64.rpm
+        dest: /tmp/nrpe-4.1.0-2.el9.x86_64.rpm
+        owner: nrpe
+        group: nrpe
+
+    - name: Install nrpe rpm
+      command: sudo dnf install -y /tmp/nrpe-4.1.0-2.el9.x86_64.rpm
+
+    - name: Enable and start nrpe service
+      service:
+        name: nrpe
+        enabled: yes
+        state: started
+
+    - name: Copy Nagios plugins
+      copy:
+        src: /home/sudip/Nagios/
+        dest: /usr/local/libexec/
+        mode: '0755'
+        owner: nrpe
+        group: nrpe
+
+    - name: Modify debug line
+      lineinfile:
+        path: /etc/nagios/nrpe.cfg
+        regexp: '^debug='
+        line: 'debug=1'
+        state: present
+
+    - name: Modify allowed_hosts line
+      lineinfile:
+        path: /etc/nagios/nrpe.cfg
+        regexp: '^allowed_hosts='
+        line: 'allowed_hosts=127.0.0.1,::1,10.210.51.12'
+        state: present
+
+    - name: Modify dont_blame_nrpe line
+      lineinfile:
+        path: /etc/nagios/nrpe.cfg
+        regexp: '^dont_blame_nrpe='
+        line: 'dont_blame_nrpe=1'
+        state: present
+
+    - name: Modify dont_blame_nrpe line
+      lineinfile:
+        path: /etc/nagios/nrpe.cfg
+        regexp: '^#ssl_version=SSLv2+'
+        line: 'ssl_version=TLSv1'
+        state: present    
+
+    - name: Hash specific command lines if not already commented
+      replace:
+        path: /etc/nagios/nrpe.cfg
+        regexp: '^(?!#)(command\[check_users\]|command\[check_load\]|command\[check_hda1\]|command\[check_zombie_procs\]|command\[check_total_procs\])='
+        replace: '#\1='
+
+    - name: Add new command lines after specific match
+      blockinfile:
+        path: /etc/nagios/nrpe.cfg
+        marker: "# {mark} ANSIBLE MANAGED BLOCK"
+        insertafter: '^#command\[check_mem\]=/usr/lib64/nagios/plugins/custom_check_mem -n \$ARG1\$'
+        block: |
+          command[check_swap]=/usr/local/libexec/check_swap -w $ARG1$ -c $ARG2$
+          command[check_load]=/usr/local/libexec/check_load -w $ARG1$ -c $ARG2$
+          command[check_disk]=/usr/local/libexec/check_disk -w $ARG1$ -c $ARG2$ -p /
+          command[check_cpu]=/usr/local/libexec/check_cpu_perf.sh -w $ARG1$ -c $ARG2$
+          command[check_memory]=/usr/local/libexec/check_mem.pl -f -w $ARG1$ -c $ARG2$ -C $ARG3$
+          command[check_procs]=/usr/local/libexec/check_procs $ARG1$
+          command[check_total_procs]=/usr/local/libexec/check_procs -w $ARG1$ -c $ARG2$
+          command[check_zombie_procs]=/usr/local/libexec/check_procs -w $ARG1$ -c $ARG2$ -s $ARG2$
+          command[check_webmethods_is]=/usr/local/libexec/check_webmethods_is $ARG1$
+          command[check_webmethods_adapters]=/usr/local/libexec/check_webmethods_adapters $HOSTADDRESS$ $ARG1$ $ARG2$
+          command[check_splunk_savedsearch_critical]=/usr/local/libexec/check_splunk_savedsearch.sh -a $ARG1$ -s $ARG2$ -c $ARG3$
+          command[check_webmethods_blackbayapi]=/usr/local/libexec/check_webmethods_blackbayapi $HOSTNAME$
+          command[check_webmethods_monitorEDIFTPConnection]=/usr/local/libexec/check_webmethods_monitorEDIFTPConnection $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_monitorHungThreads]=/usr/local/libexec/check_webmethods_monitorHungThreads $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_monitorISCSQCount]=/usr/local/libexec/check_webmethods_monitorISCSQCount $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_monitorISUMOutofSyncDocuments]=/usr/local/libexec/check_webmethods_monitorISUMOutofSyncDocuments $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_monitorWmInternalConnection]=/usr/local/libexec/check_webmethods_monitorWmInternalConnection $HOSTADDRESS$ $ARG1$
+          command[check_wemmethods_office365connection]=/usr/local/libexec/check_webmethods_office365connection $HOSTADDRESS$ $ARG1$
+          command[check_search1]=/usr/local/libexec/check_nrpe  -H $HOSTADDRESS$ -c check_search1
+          command[check_webmethods_peripheral_DB]=/usr/local/libexec/check_webmethods_peripheral_DB $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_AccountCreation]=/usr/local/libexec/check_webmethods_AccountCreation $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_CustomerCreation]=/usr/local/libexec/check_webmethods_CustomerCreation $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_archive]=/usr/local/libexec/check_webmethods_archive_new $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_monitorSalesforceConnection]=/usr/local/libexec/check_webmethods_monitorSalesforceConnection
+          command[check_webmethods_schedulers]=/usr/local/libexec/check_webmethods_schedulers $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_salesforce_case_creation]=/usr/local/libexec/check_webmethods_salesforce_case_creation $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_node1]=/usr/local/libexec/check_webmethods_enabled $HOSTADDRESS$ $ARG1$
+          command[check_https5]=/usr/local/libexec/check_http --ssl -I $HOSTADDRESS$ -u $ARG1$ -p $ARG2$
+          command[check_webmethods_monitorPrintIQSystem]=/usr/local/libexec/check_webmethods_monitorPrintIQSystem $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_c1orhangs ]=/usr/local/libexec/check_webmethods_c1orhangs $HOSTADDRESS$ $ARG1$
+          command[check_webmethods_clusterstatus]=/usr/local/libexec/check_webmethods_clusterstatus $HOSTADDRESS$
+          command[check_webmethods_isbrokerconn2]=/usr/local/libexec/check_webmethods_isbrokerconn2 $HOSTADDRESS$
+          command[check_webmethods_jdbcpools]=/usr/local/libexec/check_webmethods_jdbcpools $HOSTADDRESS$ $ARG1$
+          command[check_search1]=/usr/local/libexec/check_nrpe  -H $HOSTADDRESS$ -c check_search1
+      notify: nrpe service restart
+
+  handlers:
+    - name: nrpe service restart
+      service:
+        name: nrpe
+        state: restarted
