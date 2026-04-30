@@ -1,0 +1,16 @@
+---
+- hosts: 10.211.1.10
+  become: true
+  gather_facts: false
+  tasks:
+      - name: Creting the user
+        user:
+            name: sajal
+            password: "{{'vamshi' | password_hash('sha512')}}"
+            state: present
+      - name: Adding the user in sudo group.
+        user:
+            name: vamshi
+            groups: sudo
+            append: yes
+...
