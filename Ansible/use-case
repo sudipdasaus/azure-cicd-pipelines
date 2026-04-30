@@ -1,0 +1,38 @@
+1. file/directory creation. 
+2. Package installed. 
+3. system update.
+4. service restart.
+5. environment variable set.
+6. command execution.
+7. variable set.
+8. conditional execution.
+9. include variables from a file.
+10. gather facts of the system.
+11. NRPE plugin installation and configuration.
+12. User creation.
+13. User deletion.
+14. User password change.
+15. User password reset.
+16. User password expiry.
+17. User password lock.
+18. User password unlock.
+19. User password status.
+20. User password age.
+21. User password expiry date.
+22. File system creation.
+23. File system deletion.
+24. File system mount.
+25. File system unmount.
+26. File system resize.
+27. File system check.
+28. network interface configuration.
+29. network interface status.
+30. network interface restart.
+31. systemd log setup.
+32. Splunk agent installation.
+33. Splunk agent configuration.
+34. Splunk agent restart.
+35. Splunk agent status.
+36. Splunk agent log setup.
+37. Server joining with AD. 
+38. MOTD for all servers
