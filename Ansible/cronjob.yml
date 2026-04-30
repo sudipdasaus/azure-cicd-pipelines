@@ -1,0 +1,22 @@
+---
+- hosts: tst1
+  become: true
+  gather_facts: false
+  tasks:
+       - name: Scheduling cronjob in tst1 server
+         cron:
+            name: "Scheduling cronjob in tst1 server"
+            hour: "23,6"
+            minute: "0"
+            job: /usr/bin/systemctl restart rsyslog
+- hosts: tst2
+  become: true
+  gather_facts: false
+  tasks:
+       - name: Scheduling cronjob in tst2 server
+         cron:
+            name: "Scheduling cronjob in tst2 server"
+            hour: "12"
+            minute: "0"
+            job: /usr/bin/systemctl restart rsyslog
+...
