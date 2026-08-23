@@ -4,7 +4,7 @@
 SSH_KEY_FILE="/home/sudip/.ssh/id_rsa.pub"
 
 # Define the list of remote hosts
-REMOTE_HOSTS=("10.210.1.30")
+REMOTE_HOSTS=("192.65.1.30")
 
 # Define the username for SSH access
 SSH_USERNAME="sudip"
