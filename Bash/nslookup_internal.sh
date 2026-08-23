@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define DNS servers
-dns_servers=("10.210.75.5" "10.210.75.4" "10.10.33.2" "10.20.33.2")
+dns_servers=("192.65.75.5" "192.65.75.4" "192.65.33.2" "192.65.33.2")
 
 # File containing server names
 filename="/home/ansible/sudip/server_name"
